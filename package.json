@@ -1,0 +1,11 @@
+{
+  "name": "jquery.shapeshift",
+  "author": "Timothy Tran",
+  "version": "2.0.0",
+  "devDependencies": {
+    "grunt": "0.4.x",
+    "grunt-contrib-coffee": "0.11.x",
+    "grunt-contrib-watch": "0.6.x",
+    "coffee-script": "1.8.x"
+  }
+}

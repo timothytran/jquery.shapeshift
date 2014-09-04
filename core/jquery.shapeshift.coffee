@@ -172,7 +172,7 @@
         min_columns = options.minColumns
         if colspan > columns and colspan > min_columns
           options.minColumns = colspan
-          console.error "Shapeshift ERROR: There are child elements that have a larger colspan than the minimum columns set through options.\noptions.minColumns has been set to #{colspan}"
+          #console.error "Shapeshift ERROR: There are child elements that have a larger colspan than the minimum columns set through options.\noptions.minColumns has been set to #{colspan}"
 
     # ----------------------------
     # setParsedChildren:
@@ -234,6 +234,7 @@
       gutter_x = options.gutterX
       padding_x = options.paddingX
       inner_width = @$container.innerWidth() - (padding_x * 2)
+      offset_col = 0
 
       # Determine how many columns there currently can be
       minColumns = options.minColumns
@@ -245,13 +246,17 @@
       # Columns cannot exceed children
       children_count = @parsedChildren.length
       if columns > children_count
+        for i in [0...children_count]
+          colspan = @parsedChildren[i].colspan
+          if colspan > 1
+            offset_col = colspan - 1;
         columns = children_count
 
       # Calculate the child offset from the left
       globals.child_offset = padding_x
       switch options.align
         when "center"
-          grid_width = (columns * col_width) - gutter_x
+          grid_width = ((columns + offset_col) * col_width) - gutter_x
           globals.child_offset += (inner_width - grid_width) / 2
 
         when "right"
@@ -586,7 +591,7 @@
         target_position = 0
 
         if total_positions > 1
-          cutoff_start = options.cutoffStart + 1 || 0
+          cutoff_start = options.cutoffStart || 0
           cutoff_end = options.cutoffEnd || total_positions
 
           for position_i in [cutoff_start...cutoff_end]
@@ -613,8 +618,9 @@
             $target = parsed_children[target_position - 1].el
             $selected.insertAfter($target)
           else
-            $target = parsed_children[target_position].el
-            $selected.insertBefore($target)
+            if target_position > cutoff_start
+              $target = parsed_children[target_position].el
+              $selected.insertBefore($target)
         else
           if total_positions is 1
             attributes = child_positions[0]
@@ -695,7 +701,8 @@
       $container.off("ss-destroy")
 
       active_class = @options.activeClass
-      $active_children = $container.find("." + active_class)
+      dragWhitelist = @options.dragWhitelist
+      $active_children = $container.find("." + active_class).filter(dragWhitelist)
       
       if @options.enableDrag
         $active_children.draggable('destroy')
