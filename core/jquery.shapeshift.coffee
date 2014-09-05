@@ -263,6 +263,8 @@
           grid_width = (columns * col_width) - gutter_x
           globals.child_offset += (inner_width - grid_width)
 
+      globals.grid_width = grid_width
+
     # ----------------------------
     # arrange:
     # Animates the elements into their calcluated positions
@@ -574,6 +576,8 @@
     # ----------------------------
     setTargetPosition: ->
       options = @options
+      globals = @globals
+      $container = @$container
 
       unless options.enableTrash
         dragged_class = options.draggedClass
@@ -581,46 +585,68 @@
         $selected = $("." + dragged_class)
         $start_container = $selected.parent()
         parsed_children = @parsedChildren
-        child_positions = @getPositions(false)
+        child_positions = @getPositions(true)
         total_positions = child_positions.length
 
-        selected_x = $selected.offset().left - $start_container.offset().left + (@globals.col_width / 2)
-        selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2)
+        selected_x1 = $selected.offset().left - $start_container.offset().left
+        selected_x2 = $selected.offset().left - $start_container.offset().left + globals.col_width
+        selected_y1 = $selected.offset().top - $start_container.offset().top
+        selected_y2 = $selected.offset().top - $start_container.offset().top + $selected.height()
+        selected_index = $selected.index()
 
-        shortest_distance = 9999999
-        target_position = 0
+        if options.debug
+          console.log 'x1: ' + selected_x1 + ' x2: ' + selected_x2 + ' y1: ' + selected_y1 + ' y2: ' + selected_y2
 
+        target_position = null
         if total_positions > 1
-          cutoff_start = options.cutoffStart || 0
+          cutoff_start = options.cutoffStart + 1 || 0
           cutoff_end = options.cutoffEnd || total_positions
 
-          for position_i in [cutoff_start...cutoff_end]
-            attributes = child_positions[position_i]
+          lastPosition = child_positions[total_positions - 1]
+          lastChild = parsed_children[total_positions - 1]
 
-            if attributes
-              y_dist = selected_x - attributes.left
-              x_dist = selected_y - attributes.top
-
-              if y_dist > 0 and x_dist > 0
-                distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
-
-                if distance < shortest_distance
-                  shortest_distance = distance
-                  target_position = position_i
-
-                  if position_i is total_positions - 1
-                    if y_dist > parsed_children[position_i].height / 2
-                      target_position++
-
-
-
-          if target_position is parsed_children.length
-            $target = parsed_children[target_position - 1].el
-            $selected.insertAfter($target)
+          if selected_y2 > lastPosition.top + lastChild.el.height()
+            target_position = total_positions - 1
+            target_direction = 'right'
           else
-            if target_position > cutoff_start
-              $target = parsed_children[target_position].el
+            for position_i in [cutoff_start...cutoff_end]
+              attributes = child_positions[position_i]
+
+              if attributes
+                current = parsed_children[position_i]
+                full_width = current.el.width()
+                half_width = full_width / 2
+                full_height = current.el.height()
+                half_height = full_height / 2
+                attributes_right = attributes.left + full_width
+                attributes_bottom = attributes.top + full_height + full_height / 3
+                offset_x = full_width / 3
+                offset_y = full_height / 3
+
+                if attributes.top < selected_y2 && attributes_bottom > selected_y2
+                  if !target_position && attributes.left > selected_x1
+                    target_position = position_i
+                    if attributes.left + half_width > selected_x2
+                      target_direction = 'right'
+                    else
+                      target_direction = 'left'
+
+                  if !target_position
+                    if selected_x1 < 0 && attributes.left < full_width
+                      target_position = position_i
+                      target_direction = 'left'
+                    else if selected_x2 > globals.grid_width && attributes.right > selected_x1
+                      target_position = position_i
+                      target_direction = 'right'
+          
+          if target_position
+            $target = parsed_children[target_position].el
+
+            if target_direction == 'left'
               $selected.insertBefore($target)
+            else
+              $selected.insertAfter($target)
+            
         else
           if total_positions is 1
             attributes = child_positions[0]
