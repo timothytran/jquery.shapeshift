@@ -176,10 +176,11 @@
           first_child = this.parsedChildren[0];
           if (first_child && first_child.el) {
             fc_width = first_child.el.outerWidth();
+            fc_colspan = first_child.colspan;
           } else {
             fc_width = 0;
+            fc_colspan = 1;
           }
-          fc_colspan = first_child.colspan;
           single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
           return this.globals.col_width = single_width + gutter_x;
         } else {
