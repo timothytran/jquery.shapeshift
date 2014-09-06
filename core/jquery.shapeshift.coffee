@@ -205,7 +205,10 @@
       unless @options.colWidth >= 1
         # Determine single item / col width
         first_child = @parsedChildren[0]
-        fc_width = first_child.el.outerWidth()
+        if first_child and first_child.el
+          fc_width = first_child.el.outerWidth()
+        else
+          fc_width = 0
         fc_colspan = first_child.colspan
         single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan
         @globals.col_width = single_width + gutter_x
@@ -581,25 +584,32 @@
 
       unless options.enableTrash
         dragged_class = options.draggedClass
+        placeolder_class = options.placeholderClass
 
         $selected = $("." + dragged_class)
+        $placeholder = $("." + placeolder_class)
         $start_container = $selected.parent()
         parsed_children = @parsedChildren
         child_positions = @getPositions(true)
         total_positions = child_positions.length
 
+        selected_width = $selected.width()
+        selected_height = $selected.height()
         selected_x1 = $selected.offset().left - $start_container.offset().left
-        selected_x2 = $selected.offset().left - $start_container.offset().left + globals.col_width
+        selected_x2 = $selected.offset().left - $start_container.offset().left + $selected.width()
         selected_y1 = $selected.offset().top - $start_container.offset().top
-        selected_y2 = $selected.offset().top - $start_container.offset().top + $selected.height()
-        selected_index = $selected.index()
+        selected_y2 = $selected.offset().top - $start_container.offset().top + selected_height
+        placeholder_x = +$placeholder.css('left').replace('px', '')
+        placeholder_y = +$placeholder.css('top').replace('px', '')
 
-        if options.debug
-          console.log 'x1: ' + selected_x1 + ' x2: ' + selected_x2 + ' y1: ' + selected_y1 + ' y2: ' + selected_y2
+        if selected_x1 > placeholder_x
+          target_direction = 'right'
+        else
+          target_direction = 'left'
 
         target_position = null
         if total_positions > 1
-          cutoff_start = options.cutoffStart + 1 || 0
+          cutoff_start = options.cutoffStart || 0
           cutoff_end = options.cutoffEnd || total_positions
 
           lastPosition = child_positions[total_positions - 1]
@@ -623,22 +633,18 @@
                 offset_x = full_width / 3
                 offset_y = full_height / 3
 
-                if attributes.top < selected_y2 && attributes_bottom > selected_y2
-                  if !target_position && attributes.left > selected_x1
+                if attributes.top + offset_y < selected_y2 and attributes_bottom > selected_y2
+                  if attributes_right - offset_x > selected_x1 and attributes_right - offset_x < selected_x2
                     target_position = position_i
-                    if attributes.left + half_width > selected_x2
-                      target_direction = 'right'
-                    else
-                      target_direction = 'left'
 
                   if !target_position
-                    if selected_x1 < 0 && attributes.left < full_width
+                    if selected_x1 < 0 and attributes.left < full_width
                       target_position = position_i
                       target_direction = 'left'
-                    else if selected_x2 > globals.grid_width && attributes.right > selected_x1
+                    else if selected_x2 > globals.grid_width and attributes.right > selected_x1
                       target_position = position_i
                       target_direction = 'right'
-          
+
           if target_position
             $target = parsed_children[target_position].el
 

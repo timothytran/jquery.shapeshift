@@ -174,7 +174,11 @@
         gutter_x = this.options.gutterX;
         if (!(this.options.colWidth >= 1)) {
           first_child = this.parsedChildren[0];
-          fc_width = first_child.el.outerWidth();
+          if (first_child && first_child.el) {
+            fc_width = first_child.el.outerWidth();
+          } else {
+            fc_width = 0;
+          }
           fc_colspan = first_child.colspan;
           single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
           return this.globals.col_width = single_width + gutter_x;
@@ -506,28 +510,35 @@
       };
 
       Plugin.prototype.setTargetPosition = function() {
-        var $container, $selected, $start_container, $target, attributes, attributes_bottom, attributes_right, child_positions, current, cutoff_end, cutoff_start, dragged_class, full_height, full_width, globals, half_height, half_width, lastChild, lastPosition, offset_x, offset_y, options, parsed_children, placeholder_class, position_i, previous_container_class, selected_index, selected_x1, selected_x2, selected_y1, selected_y2, target_direction, target_position, total_positions, _i;
+        var $container, $placeholder, $selected, $start_container, $target, attributes, attributes_bottom, attributes_right, child_positions, current, cutoff_end, cutoff_start, dragged_class, full_height, full_width, globals, half_height, half_width, lastChild, lastPosition, offset_x, offset_y, options, parsed_children, placeholder_class, placeholder_x, placeholder_y, placeolder_class, position_i, previous_container_class, selected_height, selected_width, selected_x1, selected_x2, selected_y1, selected_y2, target_direction, target_position, total_positions, _i;
         options = this.options;
         globals = this.globals;
         $container = this.$container;
         if (!options.enableTrash) {
           dragged_class = options.draggedClass;
+          placeolder_class = options.placeholderClass;
           $selected = $("." + dragged_class);
+          $placeholder = $("." + placeolder_class);
           $start_container = $selected.parent();
           parsed_children = this.parsedChildren;
           child_positions = this.getPositions(true);
           total_positions = child_positions.length;
+          selected_width = $selected.width();
+          selected_height = $selected.height();
           selected_x1 = $selected.offset().left - $start_container.offset().left;
-          selected_x2 = $selected.offset().left - $start_container.offset().left + globals.col_width;
+          selected_x2 = $selected.offset().left - $start_container.offset().left + $selected.width();
           selected_y1 = $selected.offset().top - $start_container.offset().top;
-          selected_y2 = $selected.offset().top - $start_container.offset().top + $selected.height();
-          selected_index = $selected.index();
-          if (options.debug) {
-            console.log('x1: ' + selected_x1 + ' x2: ' + selected_x2 + ' y1: ' + selected_y1 + ' y2: ' + selected_y2);
+          selected_y2 = $selected.offset().top - $start_container.offset().top + selected_height;
+          placeholder_x = +$placeholder.css('left').replace('px', '');
+          placeholder_y = +$placeholder.css('top').replace('px', '');
+          if (selected_x1 > placeholder_x) {
+            target_direction = 'right';
+          } else {
+            target_direction = 'left';
           }
           target_position = null;
           if (total_positions > 1) {
-            cutoff_start = options.cutoffStart + 1 || 0;
+            cutoff_start = options.cutoffStart || 0;
             cutoff_end = options.cutoffEnd || total_positions;
             lastPosition = child_positions[total_positions - 1];
             lastChild = parsed_children[total_positions - 1];
@@ -547,14 +558,9 @@
                   attributes_bottom = attributes.top + full_height + full_height / 3;
                   offset_x = full_width / 3;
                   offset_y = full_height / 3;
-                  if (attributes.top < selected_y2 && attributes_bottom > selected_y2) {
-                    if (!target_position && attributes.left > selected_x1) {
+                  if (attributes.top + offset_y < selected_y2 && attributes_bottom > selected_y2) {
+                    if (attributes_right - offset_x > selected_x1 && attributes_right - offset_x < selected_x2) {
                       target_position = position_i;
-                      if (attributes.left + half_width > selected_x2) {
-                        target_direction = 'right';
-                      } else {
-                        target_direction = 'left';
-                      }
                     }
                     if (!target_position) {
                       if (selected_x1 < 0 && attributes.left < full_width) {
