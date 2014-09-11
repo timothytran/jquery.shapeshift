@@ -647,7 +647,7 @@
                       target_position = position_i
                       target_direction = 'right'
 
-          if target_position
+          if target_position != null
             $target = parsed_children[target_position].el
 
             if target_direction == 'left'

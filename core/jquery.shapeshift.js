@@ -576,7 +576,7 @@
                 }
               }
             }
-            if (target_position) {
+            if (target_position !== null) {
               $target = parsed_children[target_position].el;
               if (target_direction === 'left') {
                 $selected.insertBefore($target);
