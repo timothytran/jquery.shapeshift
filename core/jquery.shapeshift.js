@@ -12,6 +12,7 @@
       colWidth: null,
       columns: null,
       minColumns: 1,
+      squaredItem: false,
       autoHeight: true,
       maxHeight: null,
       minHeight: 100,
@@ -152,12 +153,34 @@
       };
 
       Plugin.prototype.setParsedChildren = function() {
-        var $child, $children, child, i, parsedChildren, total, _i;
+        var $child, $children, child, i, options, parsedChildren, total, _i;
+        options = this.options;
         $children = this.$container.find("." + this.options.activeClass).filter(":visible");
         total = $children.length;
         parsedChildren = [];
         for (i = _i = 0; 0 <= total ? _i < total : _i > total; i = 0 <= total ? ++_i : --_i) {
           $child = $($children[i]);
+          if (options.squaredItem) {
+            switch ($child.attr("data-ss-rowspan")) {
+              case "1":
+                switch ($child.attr("data-ss-colspan")) {
+                  case "1":
+                    $child.height($child.width());
+                    break;
+                  case "2":
+                    $child.height(($child.width() - options.gutterX) / 2);
+                }
+                break;
+              case "2":
+                switch ($child.attr("data-ss-colspan")) {
+                  case "1":
+                    $child.height($child.width() * 2);
+                    break;
+                  case "2":
+                    $child.height($child.width());
+                }
+            }
+          }
           child = {
             i: i,
             el: $child,

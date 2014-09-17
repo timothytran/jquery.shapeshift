@@ -21,6 +21,7 @@
     colWidth: null
     columns: null
     minColumns: 1
+    squaredItem: false
     autoHeight: true
     maxHeight: null
     minHeight: 100
@@ -180,12 +181,29 @@
     # attributes for all the active children
     # ----------------------------
     setParsedChildren: ->
+      options = @options
       $children = @$container.find("." + @options.activeClass).filter(":visible")
       total = $children.length
 
       parsedChildren = []
       for i in [0...total]
         $child = $($children[i])
+
+        if options.squaredItem
+          switch $child.attr("data-ss-rowspan")
+            when "1"
+            then switch $child.attr("data-ss-colspan")
+                when "1"
+                then $child.height $child.width();
+                when "2"
+                then $child.height ($child.width() - options.gutterX) / 2;
+            when "2"
+            then switch $child.attr("data-ss-colspan")
+                when "1"
+                then $child.height $child.width() * 2;
+                when "2"
+                then $child.height $child.width();
+
         child =
           i: i
           el: $child
