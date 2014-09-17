@@ -194,15 +194,15 @@
             when "1"
             then switch $child.attr("data-ss-colspan")
                 when "1"
-                then $child.height $child.width();
+                then $child.height $child.width()
                 when "2"
-                then $child.height ($child.width() - options.gutterX) / 2;
+                then $child.height ($child.width() / 2) - parseInt $child.css('padding-left')
             when "2"
             then switch $child.attr("data-ss-colspan")
                 when "1"
-                then $child.height $child.width() * 2;
+                then $child.height $child.width() * 2
                 when "2"
-                then $child.height $child.width();
+                then $child.height $child.width()
 
         child =
           i: i

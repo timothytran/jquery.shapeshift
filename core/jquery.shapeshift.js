@@ -168,7 +168,7 @@
                     $child.height($child.width());
                     break;
                   case "2":
-                    $child.height(($child.width() - options.gutterX) / 2);
+                    $child.height(($child.width() / 2) - parseInt($child.css('padding-left')));
                 }
                 break;
               case "2":
