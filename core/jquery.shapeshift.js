@@ -549,6 +549,9 @@
           total_positions = child_positions.length;
           selected_width = $selected.width();
           selected_height = $selected.height();
+          if (selected_height > globals.col_width) {
+            selected_height = globals.col_width;
+          }
           selected_x1 = $selected.offset().left - $start_container.offset().left;
           selected_x2 = $selected.offset().left - $start_container.offset().left + $selected.width();
           selected_y1 = $selected.offset().top - $start_container.offset().top;
