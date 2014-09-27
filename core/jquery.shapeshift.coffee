@@ -20,6 +20,7 @@
     align: "center"
     colWidth: null
     columns: null
+    maxColumns: 4
     minColumns: 1
     squaredItem: false
     autoHeight: true
@@ -278,6 +279,14 @@
       # Calculate the child offset from the left
       globals.child_offset = padding_x
       switch options.align
+        when "left"
+          grid_width = ((columns + offset_col) * col_width) - gutter_x
+          for i in [options.maxColumns..0] by -1
+            max_columns_width = ((i + offset_col) * col_width) - gutter_x
+            if max_columns_width <= inner_width
+              grid_width = max_columns_width
+              break
+          globals.child_offset += (inner_width - grid_width) / 2
         when "center"
           grid_width = ((columns + offset_col) * col_width) - gutter_x
           globals.child_offset += (inner_width - grid_width) / 2

@@ -11,6 +11,7 @@
       align: "center",
       colWidth: null,
       columns: null,
+      maxColumns: 4,
       minColumns: 1,
       squaredItem: false,
       autoHeight: true,
@@ -220,7 +221,7 @@
       };
 
       Plugin.prototype.setGridColumns = function() {
-        var children_count, col_width, colspan, columns, globals, grid_width, gutter_x, i, inner_width, minColumns, offset_col, options, padding_x, _i;
+        var children_count, col_width, colspan, columns, globals, grid_width, gutter_x, i, inner_width, max_columns_width, minColumns, offset_col, options, padding_x, _i, _j, _ref;
         globals = this.globals;
         options = this.options;
         col_width = globals.col_width;
@@ -246,6 +247,17 @@
         }
         globals.child_offset = padding_x;
         switch (options.align) {
+          case "left":
+            grid_width = ((columns + offset_col) * col_width) - gutter_x;
+            for (i = _j = _ref = options.maxColumns; _j >= 0; i = _j += -1) {
+              max_columns_width = ((i + offset_col) * col_width) - gutter_x;
+              if (max_columns_width <= inner_width) {
+                grid_width = max_columns_width;
+                break;
+              }
+            }
+            globals.child_offset += (inner_width - grid_width) / 2;
+            break;
           case "center":
             grid_width = ((columns + offset_col) * col_width) - gutter_x;
             globals.child_offset += (inner_width - grid_width) / 2;
