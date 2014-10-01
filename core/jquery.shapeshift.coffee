@@ -79,9 +79,9 @@
       if options.colWidth is null
         $children = @$container.children(options.selector)
 
-        if $children.length is 0
-          errors = true
-          console.error "#{error_msg} option colWidth must be specified if Shapeshift is initialized with no active children."
+        # if $children.length is 0
+        #   errors = true
+        #   console.error "#{error_msg} option colWidth must be specified if Shapeshift is initialized with no active children."
 
       return !errors
 
