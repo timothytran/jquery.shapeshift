@@ -262,7 +262,9 @@
 
       # Determine how many columns there currently can be
       minColumns = options.minColumns
-      columns = options.columns || Math.floor (inner_width + gutter_x) / col_width
+      columns = options.columns
+      if !options.columns and col_width > 0
+        columns = Math.floor (inner_width + gutter_x) / col_width
       if minColumns and minColumns > columns
         columns = minColumns
       globals.columns = columns

@@ -226,7 +226,10 @@
         inner_width = this.$container.innerWidth() - (padding_x * 2);
         offset_col = 0;
         minColumns = options.minColumns;
-        columns = options.columns || Math.floor((inner_width + gutter_x) / col_width);
+        columns = options.columns;
+        if (!options.columns && col_width > 0) {
+          columns = Math.floor((inner_width + gutter_x) / col_width);
+        }
         if (minColumns && minColumns > columns) {
           columns = minColumns;
         }
